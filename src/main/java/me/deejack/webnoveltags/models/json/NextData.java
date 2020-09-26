@@ -1,6 +1,7 @@
 package me.deejack.webnoveltags.models.json;
 
 import com.google.gson.annotations.SerializedName;
+import me.deejack.webnoveltags.models.json.tags.JsonTag;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package me.deejack.webnoveltags.models.json;
+package me.deejack.webnoveltags.models.json.tags;
 
 import com.google.gson.annotations.SerializedName;
 import me.deejack.webnoveltags.config.Configuration;

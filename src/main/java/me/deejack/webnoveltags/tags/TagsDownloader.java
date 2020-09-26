@@ -2,24 +2,24 @@ package me.deejack.webnoveltags.tags;
 
 import com.google.gson.Gson;
 import me.deejack.webnoveltags.config.Configuration;
-import me.deejack.webnoveltags.models.json.JsonTag;
 import me.deejack.webnoveltags.models.json.NextData;
+import me.deejack.webnoveltags.models.json.tags.JsonTag;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class TagsDownloader {
     public static final String TAGS_URL = Configuration.BASE_URL + "/all-tags/%s/%d";
-    private static final Map<String, List<JsonTag>> tagsPerCategory = new HashMap<>();
+    private static final List<JsonTag> tags = new LinkedList<>();
 
-    public CompletableFuture<Map<String, List<JsonTag>>> downloadAllTags() {
-        CompletableFuture<Map<String, List<JsonTag>>> future = CompletableFuture.supplyAsync(() -> {
+    public CompletableFuture<List<JsonTag>> downloadAllTags() {
+        CompletableFuture<List<JsonTag>> future = CompletableFuture.supplyAsync(() -> {
             System.out.println("Starting");
             var page = getPage(String.format(TAGS_URL, "0", 1));
             System.out.println("Page downloaded");
@@ -28,11 +28,15 @@ public class TagsDownloader {
             System.out.println("Loading tags");
             loadTags(data);
             System.out.println("Loaded first page");
-            for (int i = 2; i < biggestCategory.getValue(); i++) {
+            //for (int i = 2; i < biggestCategory.getValue(); i++) {
+            for (int i = 2; i < 3; i++) {
                 System.out.println("Loading " + i + " page");
                 var nextPage = getPage(String.format(TAGS_URL, biggestCategory.getKey(), i));
+                System.out.println("Loaded");
                 var nextData = getData(nextPage);
+                System.out.println("Got datas");
                 loadTags(nextData);
+                System.out.println("loaded");
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -40,10 +44,10 @@ public class TagsDownloader {
                 }
             }
 
-            for (var list : tagsPerCategory.values()) {
-                list.sort((tag, nextTag) -> tag.getName().compareToIgnoreCase(nextTag.getName()));
-            }
-            return tagsPerCategory;
+            System.out.println("Sorting");
+            tags.sort((tag, nextTag) -> tag.getName().compareToIgnoreCase(nextTag.getName()));
+            System.out.println("Sorted");
+            return tags;
         });
         return future;
     }
@@ -51,7 +55,7 @@ public class TagsDownloader {
     private Document getPage(String url) {
         try {
             System.out.println(url);
-            return Jsoup.connect(url).timeout(5*1000).get();
+            return Jsoup.connect(url).timeout(5 * 1000).get();
         } catch (IOException exc) {
             System.out.println("ERROR");
             exc.printStackTrace();
@@ -81,15 +85,7 @@ public class TagsDownloader {
     }
 
     private void loadTags(NextData data) {
-        var tags = data.getProps().getPageProps().getTags();
-        for (var tag : tags) {
-            if (tagsPerCategory.containsKey(tag.getCategory()))
-                tagsPerCategory.get(tag.getCategory()).add(tag);
-            else {
-                var tagList = new ArrayList<JsonTag>();
-                tagList.add(tag);
-                tagsPerCategory.put(tag.getCategory(), tagList);
-            }
-        }
+        var jsonTags = data.getProps().getPageProps().getTags();
+        tags.addAll(Arrays.asList(jsonTags));
     }
 }

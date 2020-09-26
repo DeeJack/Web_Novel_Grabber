@@ -1,50 +1,62 @@
 package me.deejack.webnoveltags;
 
-import com.google.gson.GsonBuilder;
-import me.deejack.webnoveltags.tags.TagsDownloader;
+import me.deejack.webnoveltags.config.Configuration;
+import me.deejack.webnoveltags.tags.TagsDownloaderTask;
+import org.jsoup.Jsoup;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Scanner;
 
 public class NovelCrawler {
     public static void main(String[] args) {
-        final AtomicBoolean finished = new AtomicBoolean(false);
-        var tagsDownloader = new TagsDownloader();
-        var future = tagsDownloader.downloadAllTags();
-        future.thenApply(result -> {
-            var json = new GsonBuilder().setPrettyPrinting().create().toJson(result);
-            try {
-                Files.writeString(Paths.get(Paths.get("").toAbsolutePath() + File.separator + "webnoveltags.json"), json, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            finished.set(true);
-            System.out.println("FINISHED");
-            return null;
-        });
+        Scanner scanner = new Scanner(System.in);
+        String input;
+        do {
+            System.out.println("What task do you want to execute? ");
+            System.out.println("1) Download tags and categories");
+            System.out.println("2) Download novels");
+            System.out.print("==> ");
 
-        var loadingFuture = CompletableFuture.supplyAsync(() -> {
-            try {
-                while (!finished.get()) {
-                    System.out.print("-");
-                    Thread.sleep(100);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            return null;
-        });
+            input = scanner.nextLine().trim().toLowerCase();
+        } while (input.length() == 0 || (input.charAt(0) != '1' && input.charAt(0) != '2'));
 
-        CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(future, loadingFuture);
-        try {
-            combinedFuture.join();
-        } catch (Exception e) {
-            e.printStackTrace();
+        switch (input.charAt(0)) {
+            case '1':
+                startTagsDownloader();
+                break;
+            case '2':
+                startNovelDownload();
+                break;
+            default:
+                System.out.println("The fuck?");
+                System.exit(0);
+                break;
         }
+
+        // /category/0_novel_page1?gender=1&bookType=&bookStatus=
+        // ->  script[type="json"]
+
+    }
+
+    private static void startNovelDownload() {
+        String csrfToken = "";
+        try {
+            var connection = Jsoup.connect("https://www." + Configuration.BASE_URL + "/category/0_novel_page1?gender=1").execute();
+            csrfToken = connection.cookie("_csrfToken");
+            if (csrfToken.trim().length() == 0) {
+                System.out.println("Failed to get token!");
+                return;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        // Needs csrfToken, page index, gender
+        final String novelFilter = "https://www." + Configuration.BASE_URL + "/apiajax/category/categoryAjax?_csrfToken=%s&orderBy=1&pageIndex=%d&categoryId=&gender=%d&categoryType=1&translateMode=0";
+
+    }
+
+    private static void startTagsDownloader() {
+        new TagsDownloaderTask().start();
     }
 }
