@@ -7,7 +7,7 @@ import org.jsoup.Jsoup;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class NovelCrawler {
+public class TagsCrawler {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         String input;
@@ -21,16 +21,12 @@ public class NovelCrawler {
         } while (input.length() == 0 || (input.charAt(0) != '1' && input.charAt(0) != '2'));
 
         switch (input.charAt(0)) {
-            case '1':
-                startTagsDownloader();
-                break;
-            case '2':
-                startNovelDownload();
-                break;
-            default:
+            case '1' -> startTagsDownloader();
+            case '2' -> startNovelDownload();
+            default -> {
                 System.out.println("The fuck?");
                 System.exit(0);
-                break;
+            }
         }
 
         // /category/0_novel_page1?gender=1&bookType=&bookStatus=

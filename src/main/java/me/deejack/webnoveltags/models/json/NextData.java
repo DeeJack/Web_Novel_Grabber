@@ -13,7 +13,7 @@ public class NextData {
         return props;
     }
 
-    public class Props {
+    public static class Props {
         @SerializedName("pageProps")
         private PageProps pageProps;
 
@@ -21,7 +21,7 @@ public class NextData {
             return pageProps;
         }
 
-        public class PageProps {
+        public static class PageProps {
             @SerializedName("tagsArr")
             private JsonTag[] tags;
             @SerializedName("letterCountMap")

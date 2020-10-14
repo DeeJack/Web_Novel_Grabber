@@ -1,1 +1,1 @@
-Main-Class: me.deejack.webnoveltags.NovelCrawler
+Main-Class: me.deejack.webnoveltags.TagsCrawler
