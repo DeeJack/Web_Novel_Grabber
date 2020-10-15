@@ -6,20 +6,24 @@ import me.deejack.webnoveltags.models.json.tags.JsonTag;
 import java.util.List;
 
 public class JsonNovel {
-    private long bookId;
-    @SerializedName("bookName")
-    private String name;
-    private String description;
-    private int categoryId;
-    private String categoryName; // TODO: needed??
-    private String authorName;
-    @SerializedName("totalScore")
-    private float score;
-    private byte translateMode;
-    @SerializedName("tagInfo")
-    private List<JsonTag> tags;
+  private long bookId;
+  @SerializedName("bookName")
+  private String name;
+  private String description;
+  private int categoryId;
+  private String categoryName; // TODO: needed??
+  private String authorName;
+  @SerializedName("totalScore")
+  private float score;
+  private byte translateMode;
+  @SerializedName("tagInfo")
+  private List<JsonTag> tags;
 
-    public String getUrl() {
-        return "";
-    }
+  public String getUrl() {
+    return "";
+  }
+
+  public SerializableNovel toSerializableNovel() {
+    return new SerializableNovel(bookId, name, description, categoryId, authorName, score, tags);
+  }
 }

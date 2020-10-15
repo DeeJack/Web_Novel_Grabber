@@ -55,7 +55,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>me.deejack.webnoveltags.NovelCrawler</mainClass>
+                            <mainClass>me.deejack.webnoveltags.TagsCrawler</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -71,7 +71,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>me.deejack.webnoveltags.NovelCrawler</mainClass>
+                            <mainClass>me.deejack.webnoveltags.TagsCrawler</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

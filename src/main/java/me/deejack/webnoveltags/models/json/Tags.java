@@ -7,19 +7,19 @@ import java.util.Collections;
 import java.util.List;
 
 public class Tags {
-    private List<Category> mainCategories;
-    private List<JsonTag> tags;
+  private final List<Category> mainCategories;
+  private final List<JsonTag> tags;
 
-    public Tags(List<Category> mainCategories, List<JsonTag> tags) {
-        this.mainCategories = Collections.unmodifiableList(mainCategories);
-        this.tags = Collections.unmodifiableList(tags);
-    }
+  public Tags(List<Category> mainCategories, List<JsonTag> tags) {
+    this.mainCategories = Collections.unmodifiableList(mainCategories);
+    this.tags = Collections.unmodifiableList(tags);
+  }
 
-    public List<Category> getMainCategories() {
-        return mainCategories;
-    }
+  public List<Category> getMainCategories() {
+    return mainCategories;
+  }
 
-    public List<JsonTag> getTags() {
-        return tags;
-    }
+  public List<JsonTag> getTags() {
+    return tags;
+  }
 }
