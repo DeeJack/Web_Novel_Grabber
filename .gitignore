@@ -87,3 +87,4 @@ src/test/
 
 webnovels.json
 webnoveltags.json
+!/.gitignore

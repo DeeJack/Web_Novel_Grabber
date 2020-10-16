@@ -2,7 +2,6 @@ package me.deejack.webnoveltags.novels.downloaders;
 
 import com.google.gson.GsonBuilder;
 import me.deejack.webnoveltags.config.Configuration;
-import me.deejack.webnoveltags.novels.NovelDatabase;
 
 import java.io.IOException;
 import java.nio.file.Files;

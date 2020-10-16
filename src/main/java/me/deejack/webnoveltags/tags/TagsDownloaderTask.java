@@ -16,17 +16,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TagsDownloaderTask {
-
-  public static void main(String[] args) throws ExecutionException, InterruptedException {
-    var categories = new TagsDownloaderTask().getCategories().get();
-    for (var category : categories) {
-      System.out.println(category.getName() + " - " + category.getId());
-    }
-  }
 
   private CompletableFuture<List<Category>> getCategories() {
     var categories = new LinkedList<Category>();
@@ -65,9 +57,7 @@ public class TagsDownloaderTask {
     });
 
     futureTags.thenApplyAsync((result) -> {
-      System.out.println("Tags completed");
       var categories = futureCategories.join();
-      System.out.println("Categories completed");
       return new Tags(categories, result);
     }).thenApply(result -> {
       var json = new GsonBuilder().setPrettyPrinting().create().toJson(result);

@@ -17,47 +17,35 @@ import java.util.concurrent.CompletableFuture;
 public class TagsDownloader {
   public static final String TAGS_URL = Configuration.BASE_URL + "/all-tags/%s/%d";
   private static final List<JsonTag> tags = new LinkedList<>();
+  private static final int TIMEOUT_TIME = 100;
 
   public CompletableFuture<List<JsonTag>> downloadAllTags() {
-    CompletableFuture<List<JsonTag>> future = CompletableFuture.supplyAsync(() -> {
-      System.out.println("Starting");
+    return CompletableFuture.supplyAsync(() -> {
       var page = getPage(String.format(TAGS_URL, "0", 1));
-      System.out.println("Page downloaded");
       var data = getData(page);
       var biggestCategory = getBiggestCategory(data);
-      System.out.println("Loading tags");
       loadTags(data);
-      System.out.println("Loaded first page");
-      //for (int i = 2; i < biggestCategory.getValue(); i++) {
-      for (int i = 2; i < 3; i++) {
-        System.out.println("Loading " + i + " page");
+      for (int i = 2; i < biggestCategory.getValue(); i++) {
         var nextPage = getPage(String.format(TAGS_URL, biggestCategory.getKey(), i));
-        System.out.println("Loaded");
         var nextData = getData(nextPage);
-        System.out.println("Got datas");
         loadTags(nextData);
-        System.out.println("loaded");
+
         try {
-          Thread.sleep(1000);
+          Thread.sleep(TIMEOUT_TIME);
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
       }
 
-      System.out.println("Sorting");
       tags.sort((tag, nextTag) -> tag.getName().compareToIgnoreCase(nextTag.getName()));
-      System.out.println("Sorted");
       return tags;
     });
-    return future;
   }
 
   private Document getPage(String url) {
     try {
-      System.out.println(url);
       return Jsoup.connect(url).timeout(5 * 1000).get();
     } catch (IOException exc) {
-      System.out.println("ERROR");
       exc.printStackTrace();
       return null;
     }
