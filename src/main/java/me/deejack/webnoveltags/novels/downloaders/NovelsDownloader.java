@@ -53,7 +53,7 @@ public class NovelsDownloader {
           e.printStackTrace();
         }
 
-      } while (lastList != null && page < 3);
+      } while (lastList != null);
       NovelDatabase.novels = fullList;
       return fullList;
     });
