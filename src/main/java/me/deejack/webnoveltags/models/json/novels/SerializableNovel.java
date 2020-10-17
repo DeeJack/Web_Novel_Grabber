@@ -7,16 +7,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SerializableNovel {
-  private final long id;
+  private final String id;
   private final String name;
   private final String description;
-  private final int mainCategoryId;
+  private final long mainCategoryId;
   private final String author;
   private final float score;
   private final List<SerializableTag> tags = new LinkedList<>();
   private NovelDetails details;
 
-  public SerializableNovel(long id, String name, String description, int mainCategoryId, String author, float score, List<JsonTag> tags) {
+  public SerializableNovel(String id, String name, String description, long mainCategoryId, String author, float score, List<JsonTag> tags) {
     this.id = id;
     this.name = name;
     this.description = description;
@@ -26,7 +26,7 @@ public class SerializableNovel {
     this.tags.addAll(tags.stream().map(JsonTag::getId).map(SerializableTag::new).collect(Collectors.toList()));
   }
 
-  public long getId() {
+  public String getId() {
     return id;
   }
 
@@ -38,7 +38,7 @@ public class SerializableNovel {
     return description;
   }
 
-  public int getMainCategoryId() {
+  public long getMainCategoryId() {
     return mainCategoryId;
   }
 

@@ -6,11 +6,11 @@ import me.deejack.webnoveltags.models.json.tags.JsonTag;
 import java.util.List;
 
 public class JsonNovel {
-  private long bookId;
+  private String bookId;
   @SerializedName("bookName")
   private String name;
   private String description;
-  private int categoryId;
+  private long categoryId;
   private String categoryName; // TODO: needed??
   private String authorName;
   @SerializedName("totalScore")
