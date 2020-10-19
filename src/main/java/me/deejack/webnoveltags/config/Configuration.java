@@ -7,11 +7,15 @@ import java.util.Scanner;
 
 public class Configuration {
   public static final String BASE_URL;
+  public static final int TIMEOUT;
 
   static {
     System.out.print("Insert the URL (no https://www needed): ");
-    var url = new Scanner(System.in).nextLine();
+    var scanner = new Scanner(System.in);
+    var url = scanner.nextLine();
     BASE_URL = "https://www." + url;
+    System.out.print("Insert the timeout: ");
+    TIMEOUT = scanner.nextInt();
   }
 
   public static Path getFileInCurrentPath(String fileName) {

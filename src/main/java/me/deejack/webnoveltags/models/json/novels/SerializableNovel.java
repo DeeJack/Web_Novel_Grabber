@@ -1,6 +1,7 @@
 package me.deejack.webnoveltags.models.json.novels;
 
 import me.deejack.webnoveltags.models.json.tags.JsonTag;
+import me.deejack.webnoveltags.models.json.tags.SerializableTag;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -23,7 +24,7 @@ public class SerializableNovel {
     this.mainCategoryId = mainCategoryId;
     this.author = author;
     this.score = score;
-    this.tags.addAll(tags.stream().map(JsonTag::getId).map(SerializableTag::new).collect(Collectors.toList()));
+    this.tags.addAll(tags.stream().map(SerializableTag::new).collect(Collectors.toList()));
   }
 
   public String getId() {
@@ -60,17 +61,5 @@ public class SerializableNovel {
 
   public void setDetails(NovelDetails details) {
     this.details = details;
-  }
-
-  public static class SerializableTag {
-    private final long id;
-
-    public SerializableTag(long id) {
-      this.id = id;
-    }
-
-    public long getId() {
-      return id;
-    }
   }
 }

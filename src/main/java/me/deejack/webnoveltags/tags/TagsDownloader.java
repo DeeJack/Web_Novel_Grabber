@@ -3,41 +3,46 @@ package me.deejack.webnoveltags.tags;
 import com.google.gson.Gson;
 import me.deejack.webnoveltags.config.Configuration;
 import me.deejack.webnoveltags.models.json.NextData;
-import me.deejack.webnoveltags.models.json.tags.JsonTag;
+import me.deejack.webnoveltags.models.json.tags.SerializableTag;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class TagsDownloader {
   public static final String TAGS_URL = Configuration.BASE_URL + "/all-tags/%s/%d";
-  private static final List<JsonTag> tags = new LinkedList<>();
-  private static final int TIMEOUT_TIME = 100;
+  private static final List<SerializableTag> tags = new LinkedList<>();
 
-  public CompletableFuture<List<JsonTag>> downloadAllTags() {
+  public CompletableFuture<List<SerializableTag>> downloadAllTags() {
     return CompletableFuture.supplyAsync(() -> {
       var page = getPage(String.format(TAGS_URL, "0", 1));
       var data = getData(page);
-      var biggestCategory = getBiggestCategory(data);
+      var pagesPerCategory = getCategoryPages(data);
       loadTags(data);
-      for (int i = 2; i < biggestCategory.getValue(); i++) {
-        var nextPage = getPage(String.format(TAGS_URL, biggestCategory.getKey(), i));
-        var nextData = getData(nextPage);
-        loadTags(nextData);
 
-        try {
-          Thread.sleep(TIMEOUT_TIME);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
+      for (var letter : pagesPerCategory.entrySet()) {
+        for (int i = 1; i < letter.getValue(); i++) {
+          System.out.println("Loading page n. " + i);
+          var nextPage = getPage(String.format(TAGS_URL, letter.getKey(), i));
+          if (nextPage == null)
+            continue;
+          System.out.println("Downloaded");
+          var nextData = getData(nextPage);
+          System.out.println("Got datas");
+          loadTags(nextData);
+          System.out.println("Loaded");
+
+          try {
+            Thread.sleep(Configuration.TIMEOUT);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
         }
       }
 
-      tags.sort((tag, nextTag) -> tag.getName().compareToIgnoreCase(nextTag.getName()));
       return tags;
     });
   }
@@ -59,21 +64,28 @@ public class TagsDownloader {
     return new Gson().fromJson(getJson(document), NextData.class);
   }
 
-  private Map.Entry<String, Integer> getBiggestCategory(NextData data) {
+  private Map<String, Integer> getCategoryPages(NextData data) {
     var lettersCount = data.getProps().getPageProps().getLetterCount();
-    String biggestCategory = "0";
-    int biggest = 0;
+    var pagesPerCategory = new HashMap<String, Integer>();
     for (var letter : lettersCount.entrySet()) {
-      if (letter.getValue() > biggest) {
-        biggest = letter.getValue();
-        biggestCategory = letter.getKey();
-      }
+      pagesPerCategory.put(letter.getKey(), letter.getValue());
     }
-    return Map.entry(biggestCategory, biggest);
+    return pagesPerCategory;
   }
 
   private void loadTags(NextData data) {
-    var jsonTags = data.getProps().getPageProps().getTags();
-    tags.addAll(Arrays.asList(jsonTags));
+    var jsonTags = Arrays.asList(data.getProps().getPageProps().getTags());
+    var noDuplicateTags = jsonTags.stream()
+            .filter(jsonTag -> tags.stream().noneMatch(tag -> tag.getIds().contains(jsonTag.getId())))
+            .collect(Collectors.toList());
+    for (var jsonTag : noDuplicateTags) {
+      var similarTag = tags.stream()
+              .filter(tag -> jsonTag.getName().equalsIgnoreCase(tag.getName()))
+              .findFirst();
+
+      similarTag
+              .ifPresentOrElse(tag -> tag.getIds().add(jsonTag.getId()),
+                      () -> tags.add(new SerializableTag(jsonTag.getName(), jsonTag.getId())));
+    }
   }
 }

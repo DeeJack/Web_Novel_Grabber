@@ -19,7 +19,6 @@ import java.util.stream.Stream;
 public class NovelsDownloader {
   private static final String LIST_URL = Configuration.BASE_URL + "/apiajax/category/categoryAjax?_csrfToken=%s&orderBy=1&pageIndex=%d&categoryId=&gender=-1&categoryType=1&translateMode=0";
   private static final String NOVEL_DETAILS_URL = Configuration.BASE_URL + "/apiajax/chapter/GetChapterList?_csrfToken=%s&bookId=%d";
-  private static final int TIMEOUT_TIME = 100;
   private final String csrfToken;
 
   {
@@ -48,7 +47,7 @@ public class NovelsDownloader {
           fullList.addAll(lastList.stream().map(JsonNovel::toSerializableNovel).collect(Collectors.toList()));
 
         try {
-          Thread.sleep(TIMEOUT_TIME); // Wait some time to make it less... suspicious?
+          Thread.sleep(Configuration.TIMEOUT); // Wait some time to make it less... suspicious?
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
@@ -88,7 +87,7 @@ public class NovelsDownloader {
         novel.setDetails(details.getData().getDetails());
 
         try {
-          Thread.sleep(TIMEOUT_TIME); // Wait some time to make it less... suspicious?
+          Thread.sleep(Configuration.TIMEOUT); // Wait some time to make it less... suspicious?
         } catch (InterruptedException e) {
           e.printStackTrace();
         }

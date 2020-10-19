@@ -32,6 +32,8 @@ public class TagsDownloaderTask {
     var elements = document.select("div.filter-wrap > a");
     for (var element : elements) {
       var id = element.attr("href").split("/")[2].split("_")[0];
+      if (Integer.parseInt(id) == 0) // Skip the "All" tag, not necessary.
+        continue;
       var category = new Category(element.text(), Integer.parseInt(id));
       categories.add(category);
     }
