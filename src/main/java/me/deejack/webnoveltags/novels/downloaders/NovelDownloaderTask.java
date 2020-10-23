@@ -38,7 +38,7 @@ public class NovelDownloaderTask {
     futureNovels.thenApply(result -> {
       var json = new GsonBuilder().setPrettyPrinting().create().toJson(result);
       try {
-        Files.writeString(Configuration.getFileInCurrentPath("webnovels.json"), json, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        Files.writeString(Configuration.getFileInCurrentPath("webnovels.json"), json);
       } catch (IOException e) {
         e.printStackTrace();
       }

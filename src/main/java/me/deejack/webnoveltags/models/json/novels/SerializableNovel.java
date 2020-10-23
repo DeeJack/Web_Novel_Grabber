@@ -1,5 +1,6 @@
 package me.deejack.webnoveltags.models.json.novels;
 
+import me.deejack.webnoveltags.models.json.novels.details.NovelDetails;
 import me.deejack.webnoveltags.models.json.tags.JsonTag;
 import me.deejack.webnoveltags.models.json.tags.SerializableTag;
 

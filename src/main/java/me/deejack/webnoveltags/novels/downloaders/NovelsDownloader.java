@@ -3,22 +3,26 @@ package me.deejack.webnoveltags.novels.downloaders;
 import com.google.gson.Gson;
 import me.deejack.webnoveltags.config.Configuration;
 import me.deejack.webnoveltags.models.json.novels.JsonNovel;
-import me.deejack.webnoveltags.models.json.novels.NovelDetailsResponse;
 import me.deejack.webnoveltags.models.json.novels.NovelResponse;
 import me.deejack.webnoveltags.models.json.novels.SerializableNovel;
+import me.deejack.webnoveltags.models.json.novels.details.*;
 import me.deejack.webnoveltags.novels.NovelDatabase;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class NovelsDownloader {
   private static final String LIST_URL = Configuration.BASE_URL + "/apiajax/category/categoryAjax?_csrfToken=%s&orderBy=1&pageIndex=%d&categoryId=&gender=-1&categoryType=1&translateMode=0";
-  private static final String NOVEL_DETAILS_URL = Configuration.BASE_URL + "/apiajax/chapter/GetChapterList?_csrfToken=%s&bookId=%d";
+  private static final String CHAPTERS_INFO_URL = Configuration.BASE_URL + "/apiajax/chapter/GetChapterList?_csrfToken=%s&bookId=%s";
+  private static final String RANK_INFO_URL = Configuration.BASE_URL + "/apiajax/powerStone/getRankInfoAjax?_csrfToken=%s&bookId=%s";
+  private static final String GIFTS_URL = Configuration.BASE_URL + "/apiajax/gift/getGiftInfo?_csrfToken=%s&bookId=%s&novelType=0";
+  private static final String REVIEWS_URL = Configuration.BASE_URL + "/go/pcm/bookReview/get-reviews?_csrfToken=%s&bookId=%s&pageIndex=1&pageSize=0&orderBy=1&novelType=0&needSummary=1";
+  private static final String RECOMMENDED_URL = Configuration.BASE_URL + "/go/pcm/recommend/getRecommendList?_csrfToken=%s&bookId=%s&type=2&pageSize=32";
   private final String csrfToken;
 
   {
@@ -73,36 +77,50 @@ public class NovelsDownloader {
   public CompletableFuture<List<SerializableNovel>> downloadNewOnly() {
     return CompletableFuture.supplyAsync(() -> {
       var currentList = NovelDatabase.novels;
-      downloadDetails(currentList.stream().filter(novel -> novel.getDetails() == null));
+      downloadDetails(currentList.stream().filter(novel -> novel.getDetails() == null).collect(Collectors.toList()));
       return currentList;
     });
   }
 
-  private void downloadDetails(Stream<SerializableNovel> novels) {
+  private void downloadDetails(List<SerializableNovel> novels) {
     novels.forEach(novel -> {
+      System.out.printf("Loading details for novel n. %d out of %d total novels", novels.indexOf(novel), novels.size());
+      var chaptersInfo = getFromJson(String.format(CHAPTERS_INFO_URL, csrfToken, novel.getId()), ChaptersInfoResponse.class);
+      var rankInfo = getFromJson(String.format(RANK_INFO_URL, csrfToken, novel.getId()), RankInfoResponse.class);
+      var reviews = getFromJson(String.format(REVIEWS_URL, csrfToken, novel.getId()), ReviewsResponse.class);
+      var gifts = getFromJson(String.format(GIFTS_URL, csrfToken, novel.getId()), GiftsResponse.class);
+      var recommended = getFromJson(String.format(RECOMMENDED_URL, csrfToken, novel.getId()), RecommendationResponse.class);
+      var details = new NovelDetails();
+      chaptersInfo.ifPresent(chapters -> details.setChaptersInfo(chapters.getData().getChaptersInfo()));
+      rankInfo.ifPresent(rank -> details.setRankInfo(rank.getRankInfo()));
+      reviews.ifPresent(review -> details.setReviews(review.getData().getReviews()));
+      gifts.ifPresent(gift -> details.setGifts(gift.getData()));
+      recommended.ifPresent(recommendation -> details.setRecommendations(recommendation.getRecommendationData().toList()));
+      novel.setDetails(details);
       try {
-        var connection = Jsoup.connect(String.format(NOVEL_DETAILS_URL, csrfToken, novel.getId())).timeout(10 * 1000).execute();
-        var json = connection.body();
-        var details = new Gson().fromJson(json, NovelDetailsResponse.class);
-        novel.setDetails(details.getData().getDetails());
-
-        try {
+        if (novels.indexOf(novel) % 10 == 0) // Every 10 novels
           Thread.sleep(Configuration.TIMEOUT); // Wait some time to make it less... suspicious?
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-
-      } catch (IOException e) {
+      } catch (InterruptedException e) {
         e.printStackTrace();
-        System.out.println("Failed fetch of novel details for book with id: " + novel.getId());
       }
     });
+  }
+
+  private <T> Optional<T> getFromJson(String url, Class<T> type) {
+    try {
+      var connection = Jsoup.connect(url).followRedirects(true).ignoreContentType(true).timeout(10 * 1000).execute();
+      var gson = new Gson();
+      return Optional.of(gson.fromJson(connection.body(), type));
+    } catch (IOException e) {
+      e.printStackTrace();
+      return Optional.empty();
+    }
   }
 
   public CompletableFuture<List<SerializableNovel>> downloadAll() {
     return CompletableFuture.supplyAsync(() -> {
       var currentList = NovelDatabase.novels;
-      downloadDetails(currentList.stream());
+      downloadDetails(currentList);
       return currentList;
     });
   }
