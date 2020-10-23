@@ -1,6 +1,9 @@
 package me.deejack.webnoveltags.config;
 
+import me.deejack.webnoveltags.TagsCrawler;
+
 import java.io.File;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
@@ -19,6 +22,12 @@ public class Configuration {
   }
 
   public static Path getFileInCurrentPath(String fileName) {
-    return Paths.get(Paths.get("").toAbsolutePath() + File.separator + fileName);
+    try {
+      return Paths.get(new File(TagsCrawler.class.getProtectionDomain().getCodeSource().getLocation()
+              .toURI()).getParent() + File.separator + fileName);
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+      return Path.of(System.getProperty("user.home") + File.separator + fileName);
+    }
   }
 }

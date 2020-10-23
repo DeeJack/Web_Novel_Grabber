@@ -41,7 +41,8 @@ public class NovelsDownloader {
 
   public CompletableFuture<List<SerializableNovel>> reloadList() {
     return CompletableFuture.supplyAsync(() -> {
-      List<SerializableNovel> fullList = new LinkedList<>();
+      List<SerializableNovel> fullList = NovelDatabase.novels;
+      fullList.clear();
       List<JsonNovel> lastList;
       int page = 1;
       do {
@@ -55,9 +56,10 @@ public class NovelsDownloader {
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
-
+        if (page % 10 == 0 && page != 0) {
+          NovelDownloaderTask.saveToFile(fullList);
+        }
       } while (lastList != null);
-      NovelDatabase.novels = fullList;
       return fullList;
     });
   }
@@ -98,8 +100,10 @@ public class NovelsDownloader {
       recommended.ifPresent(recommendation -> details.setRecommendations(recommendation.getRecommendationData().toList()));
       novel.setDetails(details);
       try {
-        if (novels.indexOf(novel) % 10 == 0) // Every 10 novels
+        if (novels.indexOf(novel) % 10 == 0) { // Every 10 novels
+          NovelDownloaderTask.saveToFile(novels);
           Thread.sleep(Configuration.TIMEOUT); // Wait some time to make it less... suspicious?
+        }
       } catch (InterruptedException e) {
         e.printStackTrace();
       }

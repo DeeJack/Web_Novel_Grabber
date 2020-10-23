@@ -5,7 +5,7 @@ import me.deejack.webnoveltags.config.Configuration;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -36,12 +36,7 @@ public class NovelDownloaderTask {
     });
 
     futureNovels.thenApply(result -> {
-      var json = new GsonBuilder().setPrettyPrinting().create().toJson(result);
-      try {
-        Files.writeString(Configuration.getFileInCurrentPath("webnovels.json"), json);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      saveToFile(result);
       finished.set(true);
       System.out.println("FINISHED");
       return null;
@@ -53,5 +48,18 @@ public class NovelDownloaderTask {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  public static void saveToFile(Object result, Path path) {
+    var json = new GsonBuilder().setPrettyPrinting().create().toJson(result);
+    try {
+      Files.writeString(path, json);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static void saveToFile(Object result) {
+    saveToFile(result, Configuration.getFileInCurrentPath("webnovels.json"));
   }
 }
