@@ -10,7 +10,6 @@ import me.deejack.webnoveltags.novels.NovelDatabase;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -91,17 +90,17 @@ public class NovelsDownloader {
       var rankInfo = getFromJson(String.format(RANK_INFO_URL, csrfToken, novel.getId()), RankInfoResponse.class);
       var reviews = getFromJson(String.format(REVIEWS_URL, csrfToken, novel.getId()), ReviewsResponse.class);
       var gifts = getFromJson(String.format(GIFTS_URL, csrfToken, novel.getId()), GiftsResponse.class);
-      var recommended = getFromJson(String.format(RECOMMENDED_URL, csrfToken, novel.getId()), RecommendationResponse.class);
+      //var recommended = getFromJson(String.format(RECOMMENDED_URL, csrfToken, novel.getId()), RecommendationResponse.class);
       var details = new NovelDetails();
       chaptersInfo.ifPresent(chapters -> details.setChaptersInfo(chapters.getData().getChaptersInfo()));
       rankInfo.ifPresent(rank -> details.setRankInfo(rank.getRankInfo()));
       reviews.ifPresent(review -> details.setReviews(review.getData().getReviews()));
       gifts.ifPresent(gift -> details.setGifts(gift.getData()));
-      recommended.ifPresent(recommendation -> details.setRecommendations(recommendation.getRecommendationData().toList()));
+      //recommended.ifPresent(recommendation -> details.setRecommendations(recommendation.getRecommendationData().toList()));
       novel.setDetails(details);
       try {
-        if (novels.indexOf(novel) % 10 == 0) { // Every 10 novels
-          NovelDownloaderTask.saveToFile(novels);
+        if (novels.indexOf(novel) % 10 == 0 && novels.indexOf(novel) != 0) { // Every 10 novels
+          NovelDownloaderTask.saveToFile(NovelDatabase.novels);
           Thread.sleep(Configuration.TIMEOUT); // Wait some time to make it less... suspicious?
         }
       } catch (InterruptedException e) {
@@ -125,6 +124,18 @@ public class NovelsDownloader {
     return CompletableFuture.supplyAsync(() -> {
       var currentList = NovelDatabase.novels;
       downloadDetails(currentList);
+      return currentList;
+    });
+  }
+
+  public CompletableFuture<List<SerializableNovel>> download500(int from) {
+    return CompletableFuture.supplyAsync(() -> {
+      var currentList = NovelDatabase.novels;
+      if (currentList.size() > from + 500) {
+        downloadDetails(currentList.subList(from, from + 500));
+      } else {
+        downloadDetails(currentList.subList(from, from + (currentList.size() - from)));
+      }
       return currentList;
     });
   }

@@ -40,12 +40,30 @@ public class TagsCrawler {
     var output = new String[]{
             "------ Get Novel Details ------- ",
             "1) New only",
-            "2) All"
+            "2) All",
+            "3) Download 500 novels"
     };
-    var choice = createMenu(output, '1', '2');
+    var choice = createMenu(output, '1', '2', '3');
     switch (choice) {
       case '1' -> new NovelDownloaderTask().start(DownloadRequested.NEW_ONLY);
       case '2' -> new NovelDownloaderTask().start(DownloadRequested.ALL);
+      case '3' -> {
+        int from = -1;
+        boolean ok;
+        var scanner = new Scanner(System.in);
+        do {
+          System.out.print("From novel n.: ");
+          ok = scanner.hasNextInt();
+          if (!ok) {
+            System.out.println("Insert an int!");
+            scanner.nextLine();
+          } else {
+            ok = true;
+            from = scanner.nextInt();
+          }
+        } while (!ok);
+        new NovelDownloaderTask().start(DownloadRequested.DOWNLOAD_500, from);
+      }
     }
   }
 

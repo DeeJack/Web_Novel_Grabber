@@ -11,7 +11,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NovelDownloaderTask {
 
+  public static void saveToFile(Object result, Path path) {
+    var json = new GsonBuilder().setPrettyPrinting().create().toJson(result);
+    try {
+      Files.writeString(path, json);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static void saveToFile(Object result) {
+    saveToFile(result, Configuration.getFileInCurrentPath("webnovels.json"));
+  }
+
   public void start(DownloadRequested downloadRequested) {
+    start(downloadRequested, 0);
+  }
+
+  public void start(DownloadRequested downloadRequested, int from) {
     final AtomicBoolean finished = new AtomicBoolean(false);
     var novelsDownloader = new NovelsDownloader();
     CompletableFuture<?> futureNovels;
@@ -20,6 +37,7 @@ public class NovelDownloaderTask {
       case ALL -> futureNovels = novelsDownloader.downloadAll();
       case NEW_ONLY -> futureNovels = novelsDownloader.downloadNewOnly();
       case LIST_ONLY -> futureNovels = novelsDownloader.reloadList();
+      case DOWNLOAD_500 -> futureNovels = novelsDownloader.download500(from);
       default -> throw new IllegalArgumentException("Wtf, it's an enum bro");
     }
 
@@ -48,18 +66,5 @@ public class NovelDownloaderTask {
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
-
-  public static void saveToFile(Object result, Path path) {
-    var json = new GsonBuilder().setPrettyPrinting().create().toJson(result);
-    try {
-      Files.writeString(path, json);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public static void saveToFile(Object result) {
-    saveToFile(result, Configuration.getFileInCurrentPath("webnovels.json"));
   }
 }

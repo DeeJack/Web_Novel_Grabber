@@ -1,16 +1,20 @@
 package me.deejack.webnoveltags.models.json.novels.details;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class NovelDetails {
-  private LocalDate updatedAt;
+  private final String updatedAt;
   private ChaptersInfoResponse.ChaptersInfo chaptersInfo;
   private RankInfoResponse.RankInfo rankInfo;
   private GiftsResponse.Gifts gifts;
   private ReviewsResponse.Reviews reviews;
-  private RecommendationResponse.Recommendations recommendations;
+  //private RecommendationResponse.Recommendations recommendations;
 
-  public LocalDate getUpdatedAt() {
+  public NovelDetails() {
+    updatedAt = LocalDateTime.now().toString();
+  }
+
+  public String getUpdatedAt() {
     return updatedAt;
   }
 
@@ -18,43 +22,32 @@ public class NovelDetails {
     return chaptersInfo;
   }
 
-  public RankInfoResponse.RankInfo getRankInfo() {
-    return rankInfo;
-  }
-
-  public GiftsResponse.Gifts getGifts() {
-    return gifts;
-  }
-
-  public ReviewsResponse.Reviews getReviews() {
-    return reviews;
-  }
-
-  public RecommendationResponse.Recommendations getRecommendations() {
-    return recommendations;
-  }
-
-  public void setUpdatedAt(LocalDate updatedAt) {
-    this.updatedAt = updatedAt;
-  }
-
   public void setChaptersInfo(ChaptersInfoResponse.ChaptersInfo chaptersInfo) {
     this.chaptersInfo = chaptersInfo;
+  }
+
+  public RankInfoResponse.RankInfo getRankInfo() {
+    return rankInfo;
   }
 
   public void setRankInfo(RankInfoResponse.RankInfo rankInfo) {
     this.rankInfo = rankInfo;
   }
 
+  public GiftsResponse.Gifts getGifts() {
+    return gifts;
+  }
+
   public void setGifts(GiftsResponse.Gifts gifts) {
     this.gifts = gifts;
+  }
+
+  public ReviewsResponse.Reviews getReviews() {
+    return reviews;
   }
 
   public void setReviews(ReviewsResponse.Reviews reviews) {
     this.reviews = reviews;
   }
 
-  public void setRecommendations(RecommendationResponse.Recommendations recommendations) {
-    this.recommendations = recommendations;
-  }
 }
