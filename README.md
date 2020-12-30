@@ -28,3 +28,6 @@ java -jar web_novels_grabber.jar
 After choosing the task you want to execute, you need to insert the URL of the site, the only supported site for now is a certain famous site, which I don't want to mention for precaution (more like to cover my ass).
 After the URL, you also need to insert the timeout. This is needed to not overwork (and not aourse suspicions) the local network and the site. The timeout is in milliseconds (1000 ms -> 1 second).
 During the execution, the program will create the output files in the directory you started the program from.
+
+## Result example
+![Result example.](/readme/result.png "Result.")
