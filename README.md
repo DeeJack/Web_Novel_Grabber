@@ -1,6 +1,6 @@
 # Web Novels Grabber
 This is a Java program that let the user download, from a certain popular web novel site, various information such as tags, novels and details about the novels.
-This is a program created to get the info needed from my other program: [Web_novels_filter](https://github.com/DeeJack/Web_Novel_Grabber/), which is a website used to filter the novels, to find new, good novels.
+This is a program created to get the info needed from my other program: [WebNovelTagsSearch](https://github.com/DeeJack/WebNovelTagsSearch), which is a website used to filter the novels, to find new, good novels.
 
 <!-- GETTING STARTED -->
 ## Getting Started
